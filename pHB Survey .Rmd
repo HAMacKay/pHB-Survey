@@ -1,0 +1,137 @@
+---
+title: "pHB Survey"
+author: "Heather A. MacKay"
+date: 'Spring 2017'
+output: html_document
+---
+
+```{R setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library("car")
+library(RColorBrewer)
+library(devtools)
+install_github("ggbiplot", "vqv")
+library(ggbiplot)
+```
+
+```{R Data Cleaning, echo=FALSE}
+pHB_Survey_Raw <- read_excel("~/Documents/Masters Degree/pHB Survey /pHB Survey Raw.xlsx")
+pHB_Survey<- na.omit(pHB_Survey_Raw)
+row.names(pHB_Survey) <- pHB_Survey[,2]
+pHB_Survey$`SAMPLE ID` <-NULL
+pHB_Survey$`SAMPLE NAME` <-NULL
+```
+
+```{R Basic Statistics and Correlation}
+sapply(pHB_Survey, mean)
+sapply(pHB_Survey, sd)
+plot(pHB_Survey$`pHB CONTENT (mg/g wood)`, pHB_Survey$S2G)
+cor(pHB_Survey, method = "pearson")
+  mosthighlycorrelated <- function(pHB_Survey,numtoreport)
+  {
+     # find the correlations
+     cormatrix <- cor(pHB_Survey)
+     # set the correlations on the diagonal or lower triangle to zero,
+     # so they will not be reported as the highest ones:
+     diag(cormatrix) <- 0
+     cormatrix[lower.tri(cormatrix)] <- 0
+     # flatten the matrix into a dataframe for easy sorting
+     fm <- as.data.frame(as.table(cormatrix))
+     # assign human-friendly names
+     names(fm) <- c("First.Variable", "Second.Variable","Correlation")
+     # sort and print the top n correlations
+     head(fm[order(abs(fm$Correlation),decreasing=T),],n=numtoreport)
+  }
+mosthighlycorrelated(pHB_Survey, 361)
+
+#Normilization
+pHB_Survey_Norm <- as.data.frame(scale(pHB_Survey))
+sapply(pHB_Survey_Norm,mean)
+sapply(pHB_Survey_Norm,sd)
+
+#PCA
+pHBA.pca <- prcomp(pHB_Survey_Norm)  
+summary(pHBA.pca)
+#The total variance explained by the components
+sum((pHBA.pca$sdev)^2) #All variables included in the analysis 
+screeplot(pHBA.pca, type="lines") #Looks as though there are many PC's influencing the data, I doubt that we can exclude any variables. 
+# ALso check this via. Kaiser's criterion and only consider PC's>=1
+(pHBA.pca$sdev)^2 #-> PCA 1-8 are relevent
+
+top_cor <- pHB_Survey[, c(1,3,5,6,8,9,10,11,13,15,16,17,18,19)]
+
+# log transform 
+log.top_cor <- log(top_cor)
+ 
+# apply PCA - scale. = TRUE is highly 
+# advisable, but default is FALSE. 
+top_cor_pca <- prcomp(log.top_cor,
+                 center = TRUE,
+                 scale. = TRUE) 
+print(top_cor_pca)
+plot(top_cor_pca, type = "l")
+summary(top_cor_pca)
+predict(top_cor_pca, newdata=tail(log.top_cor, 2))
+
+
+g <- ggbiplot(top_cor_pca, obs.scale = 1, var.scale = 1, ellipse = TRUE, 
+              circle = TRUE)
+g <- g + scale_color_discrete(name = '')
+g <- g + theme(legend.direction = 'horizontal', 
+               legend.position = 'top')
+print(g)
+```
+
+```{R Basic Statistics by Lenka}
+data.pHB<-read.delim("clipboard")
+attach(data.pHB)
+detach(data.pHB)
+rm(data.pHB)
+str(data.pHB)
+
+head(data.pHB)
+
+
+# checking for trends
+pairs(data.pHB)
+hist(PHB)
+shapiro.test(PHB)
+log.phb<-log(PHB)
+hist(log.phb)
+hist(TOT_LIG)
+
+plot(PHB,TOT_LIG, pch=16, xlab="PhB", ylab= "total lignin")
+cor.test(PHB,TOT_LIG, method = "spearman")
+cor.test(log.phb,TOT_LIG, method = "pearson")
+plot(TOT_LIG,log.phb, pch=16, ylab="PhB (log)", xlab= "total lignin")
+abline(lm(log.phb~TOT_LIG))
+summary(lm(log.phb~TOT_LIG))
+
+# correlation with S2G
+hist(S2G)
+
+plot(PHB,S2G, pch=16, xlab="PhB", ylab= "S:G")
+cor.test(PHB,S2G, method = "spearman")
+cor.test(log.phb,S2G, method = "pearson")
+plot(S2G,log.phb, pch=16, ylab="PhB (log)", xlab= "S:G")
+abline(lm(log.phb~S2G))
+summary(lm(log.phb~S2G))
+
+# correlation with density
+hist(DENS)
+
+plot(PHB,DENS, pch=16, xlab="PhB", ylab= "Density")
+cor.test(PHB,DENS, method = "spearman")
+cor.test(log.phb,DENS, method = "pearson")
+plot(DENS,log.phb, pch=16, ylab="PhB (log)", xlab= "Density")
+abline(lm(log.phb~DENS))
+summary(lm(log.phb~DENS))
+
+# adding covariate of location to the model
+# ading area as fixed effect (meaning we are interested in the effect of location)
+model.density.area<-lm(log.phb~DENS+area)
+
+# mised effect model (not interested in the area as a driving variable but accounting for spatial groups)
+model.density.area.mixed<-lmer(log.phb~DENS+(1|area))
+```
