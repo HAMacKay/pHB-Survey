@@ -1,0 +1,195 @@
+---
+title: "Pairwise Correlation Analysis"
+author: "Heather A. MacKay"
+date: '2017-08-02'
+output: html_document
+---
+
+---
+title: "pHB Survey"
+author: "Heather A. MacKay"
+date: 'Spring 2017'
+output: html_document
+---
+
+```{R setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library("car")
+library(RColorBrewer)
+library(devtools)
+install_github("ggbiplot", "vqv")
+library(ggbiplot)
+```
+
+```{R Data Cleaning, echo=FALSE}
+pHB_Survey_Raw <- read_csv("~/Desktop/pHB-Survey/pHB Survey - Working dataset.csv", 
+      col_types = cols(ARA = col_number(), 
+          A_CELL = col_number(), CRYST = col_number(), 
+          DENS = col_number(), FIB_LNGTH = col_number(), 
+          GAL = col_number(), GLU = col_number(), 
+          HEMICELL = col_number(), HOLO = col_number(), 
+          INS_LIG = col_number(), MAN = col_number(), 
+          MFA = col_number(), MFA_YR1 = col_number(), 
+          PHB = col_number(), 
+          RHA = col_number(), S2G = col_number(), 
+          SOL_LIG = col_number(), TOT_LIG = col_number(), 
+          XYL = col_number()))
+pHB_Survey<- na.omit(pHB_Survey_Raw)
+pHB_Survey_Cor <- pHB_Survey[,-1]
+pHB_Survey_Cor <- pHB_Survey_Cor[,-1]
+```
+
+```{R Basic Statistics and Correlation}
+sapply(pHB_Survey_Cor, mean)
+sapply(pHB_Survey_Cor, sd)
+plot(pHB_Survey_Cor$`PHB`, pHB_Survey$S2G)
+cor(pHB_Survey_Cor, method = "pearson")
+  mosthighlycorrelated <- function(pHB_Survey_Cor,numtoreport)
+  {
+     # find the correlations
+     cormatrix <- cor(pHB_Survey_Cor)
+     # set the correlations on the diagonal or lower triangle to zero,
+     # so they will not be reported as the highest ones:
+     diag(cormatrix) <- 0
+     cormatrix[lower.tri(cormatrix)] <- 0
+     # flatten the matrix into a dataframe for easy sorting
+     fm <- as.data.frame(as.table(cormatrix))
+     # assign human-friendly names
+     names(fm) <- c("First.Variable", "Second.Variable","Correlation")
+     # sort and print the top n correlations
+     head(fm[order(abs(fm$Correlation),decreasing=T),],n=numtoreport)
+  }
+mosthighlycorrelated(pHB_Survey_Cor, 361)
+# From this table we can see which pHB correlations are the most interesting and get a starting point of the variables of interest. 
+
+# correlation with S2G
+hist(pHB_Survey$S2G)
+plot(pHB_Survey$PHB,pHB_Survey$S2G, pch=16, xlab="pHB", ylab= "S:G")
+cor.test(pHB_Survey$PHB,pHB_Survey$S2G, method = "spearman")
+abline(lm(pHB_Survey$S2G~pHB_Survey$PHB))
+summary(lm(pHB_Survey$S2G~pHB_Survey$PHB))
+
+# Investigating the log of S:G 
+log.S2G<-log(pHB_Survey$S2G)
+hist(log.S2G)
+cor.test(log.S2G,pHB_Survey$PHB, method = "pearson")
+plot(pHB_Survey$PHB,log.S2G, pch=16, ylab="pHB", xlab= "S:G (log)")
+summary(lm(log.S2G~pHB_Survey$PHB))
+
+#Investigating the log of pHB 
+log.phb<-log(pHB_Survey$PHB)
+hist(log.phb)
+cor.test(log.phb,pHB_Survey$S2G, method = "pearson")
+plot(pHB_Survey$S2G,log.phb, pch=16, ylab="pHB (log)", xlab= "S:G")
+abline(lm(log.phb~pHB_Survey$S2G))
+summary(lm(log.phb~pHB_Survey$S2G))
+
+# Investigating the log of both
+cor.test(log.phb,log.S2G, method = "pearson")
+plot(log.S2G,log.phb, pch=16, ylab="pHB (log)", xlab= "S:G (log)")
+
+# correlation with DENS
+hist(pHB_Survey$DENS)
+plot(pHB_Survey$PHB,pHB_Survey$DENS, pch=16, xlab="pHB", ylab= "DENS")
+cor.test(pHB_Survey$PHB,pHB_Survey$DENS, method = "spearman")
+abline(lm(pHB_Survey$DENS~pHB_Survey$PHB))
+summary(lm(pHB_Survey$DENS~pHB_Survey$PHB))
+
+# Investigating the log of density 
+log.DENS<-log(pHB_Survey$DENS)
+hist(log.DENS)
+cor.test(log.DENS,pHB_Survey$PHB, method = "pearson")
+plot(pHB_Survey$PHB,log.DENS, pch=16, ylab="pHB", xlab= "DENS (log)")
+summary(lm(log.DENS~pHB_Survey$PHB))
+
+# Investigating the log of pHB 
+cor.test(log.phb,pHB_Survey$DENS, method = "pearson")
+plot(pHB_Survey$DENS,log.phb, pch=16, ylab="pHB (log)", xlab= "DENS")
+abline(lm(log.phb~pHB_Survey$DENS))
+summary(lm(log.phb~pHB_Survey$DENS))
+
+# Investigating the log of both
+cor.test(log.phb,log.DENS, method = "pearson")
+plot(log.DENS,log.phb, pch=16, ylab="pHB (log)", xlab= "DENS (log)")
+
+# correlation with HOLO
+hist(pHB_Survey$HOLO)
+plot(pHB_Survey$PHB,pHB_Survey$HOLO, pch=16, xlab="pHB", ylab= "HOLO")
+cor.test(pHB_Survey$PHB,pHB_Survey$HOLO, method = "spearman")
+abline(lm(pHB_Survey$HOLO~pHB_Survey$PHB))
+summary(lm(pHB_Survey$HOLO~pHB_Survey$PHB))
+
+# Investigating the log of density 
+log.HOLO<-log(pHB_Survey$HOLO)
+hist(log.HOLO)
+cor.test(log.HOLO,pHB_Survey$PHB, method = "pearson")
+plot(pHB_Survey$PHB,log.HOLO, pch=16, ylab="pHB", xlab= "HOLO (log)")
+summary(lm(log.HOLO~pHB_Survey$PHB))
+
+# Investigating the log of pHB 
+cor.test(log.phb,pHB_Survey$HOLO, method = "pearson")
+plot(pHB_Survey$HOLO,log.phb, pch=16, ylab="pHB (log)", xlab= "HOLO")
+abline(lm(log.phb~pHB_Survey$HOLO))
+summary(lm(log.phb~pHB_Survey$HOLO))
+
+# Investigating the log of both
+cor.test(log.phb,log.HOLO, method = "pearson")
+plot(log.HOLO,log.phb, pch=16, ylab="pHB (log)", xlab= "DENS (log)")
+```
+
+```{R Basic Statistics by Lenka}
+#run if working on Windows 
+data.pHB<-read.delim("clipboard")
+#run if working on Mac
+data.pHB<-read.delim(pipe(“pbpaste”))
+attach(data.pHB)
+detach(data.pHB)
+rm(data.pHB)
+str(data.pHB)
+
+head(data.pHB)
+
+
+# checking for trends
+pairs(data.pHB)
+hist(PHB)
+shapiro.test(PHB)
+log.phb<-log(PHB)
+hist(log.phb)
+hist(TOT_LIG)
+
+plot(PHB,TOT_LIG, pch=16, xlab="PhB", ylab= "total lignin")
+cor.test(PHB,TOT_LIG, method = "spearman")
+cor.test(log.phb,TOT_LIG, method = "pearson")
+plot(TOT_LIG,log.phb, pch=16, ylab="PhB (log)", xlab= "total lignin")
+abline(lm(log.phb~TOT_LIG))
+summary(lm(log.phb~TOT_LIG))
+
+# correlation with S2G
+hist(S2G)
+
+plot(PHB,S2G, pch=16, xlab="PhB", ylab= "S:G")
+cor.test(PHB,S2G, method = "spearman")
+cor.test(log.phb,S2G, method = "pearson")
+plot(S2G,log.phb, pch=16, ylab="PhB (log)", xlab= "S:G")
+abline(lm(log.phb~S2G))
+summary(lm(log.phb~S2G))
+
+# correlation with density
+hist(DENS)
+
+plot(PHB,DENS, pch=16, xlab="PhB", ylab= "Density")
+cor.test(PHB,DENS, method = "spearman")
+cor.test(log.phb,DENS, method = "pearson")
+plot(DENS,log.phb, pch=16, ylab="PhB (log)", xlab= "Density")
+abline(lm(log.phb~DENS))
+summary(lm(log.phb~DENS))
+
+# adding covariate of location to the model
+# ading area as fixed effect (meaning we are interested in the effect of location)
+model.density.area<-lm(log.phb~DENS+area)
+
+# mised effect model (not interested in the area as a driving variable but accounting for spatial groups)
+model.density.area.mixed<-lmer(log.phb~DENS+(1|area))
+```
