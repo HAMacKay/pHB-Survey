@@ -18,24 +18,22 @@ library(readxl)
 library("car")
 library(RColorBrewer)
 library(devtools)
-install_github("ggbiplot", "vqv")
 library(ggbiplot)
 ```
 
 ```{R Data Cleaning, echo=FALSE}
-pHB_Survey_Raw <- read_csv("~/Desktop/pHB-Survey/pHB Survey - Working dataset.csv", 
-      col_types = cols(ARA = col_number(), 
-          A_CELL = col_number(), CRYST = col_number(), 
-          DENS = col_number(), FIB_LNGTH = col_number(), 
-          GAL = col_number(), GLU = col_number(), 
-          HEMICELL = col_number(), HOLO = col_number(), 
-          INS_LIG = col_number(), MAN = col_number(), 
-          MFA = col_number(), MFA_YR1 = col_number(), 
-          PHB = col_number(), 
-          RHA = col_number(), S2G = col_number(), 
-          SOL_LIG = col_number(), TOT_LIG = col_number(), 
-          XYL = col_number()))
-pHB_Survey<- na.omit(pHB_Survey_Raw)
+dataset <- read_csv("~/Desktop/pHB-Survey/pHB Survey - Working dataset.csv", 
+    col_types = cols(ARA = col_number(), 
+         A_CELL = col_number(), CRYST = col_number(), 
+         DENS = col_number(), FIB_LNGTH = col_number(), 
+         GAL = col_number(), GLU = col_number(), 
+         HEMICELL = col_number(), HOLO = col_number(), 
+         INS_LIG = col_number(), MAN = col_number(), 
+         MFA = col_number(), MFA_YR1 = col_number(), 
+         PHB = col_number(), RHA = col_number(), 
+         S2G = col_number(), SOL_LIG = col_number(), 
+         TOT_LIG = col_number(), XYL = col_number()))
+pHB_Survey<- na.omit(dataset)
 pHB_Survey_Cor <- pHB_Survey[,-1]
 pHB_Survey_Cor <- pHB_Survey_Cor[,-1]
 ```
@@ -75,6 +73,7 @@ log.S2G<-log(pHB_Survey$S2G)
 hist(log.S2G)
 cor.test(log.S2G,pHB_Survey$PHB, method = "pearson")
 plot(pHB_Survey$PHB,log.S2G, pch=16, ylab="pHB", xlab= "S:G (log)")
+adline(lm(log.S2G~pHB_Survey$PHB))
 summary(lm(log.S2G~pHB_Survey$PHB))
 
 #Investigating the log of pHB 
@@ -88,6 +87,8 @@ summary(lm(log.phb~pHB_Survey$S2G))
 # Investigating the log of both
 cor.test(log.phb,log.S2G, method = "pearson")
 plot(log.S2G,log.phb, pch=16, ylab="pHB (log)", xlab= "S:G (log)")
+abline(lm(log.phb~log.S2G))
+summary(lm(log.phb~log.S2G))
 
 # correlation with DENS
 hist(pHB_Survey$DENS)
@@ -101,6 +102,7 @@ log.DENS<-log(pHB_Survey$DENS)
 hist(log.DENS)
 cor.test(log.DENS,pHB_Survey$PHB, method = "pearson")
 plot(pHB_Survey$PHB,log.DENS, pch=16, ylab="pHB", xlab= "DENS (log)")
+adline(lm(log.DENS~pHB_Survey$PHB))
 summary(lm(log.DENS~pHB_Survey$PHB))
 
 # Investigating the log of pHB 
@@ -112,6 +114,8 @@ summary(lm(log.phb~pHB_Survey$DENS))
 # Investigating the log of both
 cor.test(log.phb,log.DENS, method = "pearson")
 plot(log.DENS,log.phb, pch=16, ylab="pHB (log)", xlab= "DENS (log)")
+abline(lm(log.phb~log.DENS))
+summary(lm(log.phb~log.DENS))
 
 # correlation with HOLO
 hist(pHB_Survey$HOLO)
@@ -125,6 +129,7 @@ log.HOLO<-log(pHB_Survey$HOLO)
 hist(log.HOLO)
 cor.test(log.HOLO,pHB_Survey$PHB, method = "pearson")
 plot(pHB_Survey$PHB,log.HOLO, pch=16, ylab="pHB", xlab= "HOLO (log)")
+adline(lm(log.HOLO~pHB_Survey$PHB))
 summary(lm(log.HOLO~pHB_Survey$PHB))
 
 # Investigating the log of pHB 
@@ -135,21 +140,264 @@ summary(lm(log.phb~pHB_Survey$HOLO))
 
 # Investigating the log of both
 cor.test(log.phb,log.HOLO, method = "pearson")
-plot(log.HOLO,log.phb, pch=16, ylab="pHB (log)", xlab= "DENS (log)")
+plot(log.HOLO,log.phb, pch=16, ylab="pHB (log)", xlab= "HOLO (log)")
+abline(lm(log.phb~log.HOLO))
+summary(lm(log.phb~log.HOLO))
+
+# correlation with SOL_LIG
+hist(pHB_Survey$SOL_LIG)
+plot(pHB_Survey$PHB,pHB_Survey$SOL_LIG, pch=16, xlab="pHB", ylab= "SOL_LIG")
+cor.test(pHB_Survey$PHB,pHB_Survey$SOL_LIG, method = "spearman")
+abline(lm(pHB_Survey$SOL_LIG~pHB_Survey$PHB))
+summary(lm(pHB_Survey$SOL_LIG~pHB_Survey$PHB))
+
+# Investigating the log of SOL_LIG 
+log.SOL_LIG<-log(pHB_Survey$SOL_LIG)
+hist(log.SOL_LIG)
+cor.test(log.SOL_LIG,pHB_Survey$PHB, method = "pearson")
+plot(pHB_Survey$PHB,log.SOL_LIG, pch=16, ylab="pHB", xlab= "SOL_LIG (log)")
+adline(lm(log.SOL_LIG~pHB_Survey$PHB))
+summary(lm(log.SOL_LIG~pHB_Survey$PHB))
+
+# Investigating the log of pHB 
+cor.test(log.phb,pHB_Survey$SOL_LIG, method = "pearson")
+plot(pHB_Survey$SOL_LIG,log.phb, pch=16, ylab="pHB (log)", xlab= "SOL_LIG")
+abline(lm(log.phb~pHB_Survey$SOL_LIG))
+summary(lm(log.phb~pHB_Survey$SOL_LIG))
+
+# Investigating the log of both
+cor.test(log.phb,log.SOL_LIG, method = "pearson")
+plot(log.SOL_LIG,log.phb, pch=16, ylab="pHB (log)", xlab= "SOL_LIG (log)")
+abline(lm(log.phb~log.SOL_LIG))
+summary(lm(log.phb~log.SOL_LIG))
+
+# correlation with INS_LIG
+hist(pHB_Survey$INS_LIG)
+plot(pHB_Survey$PHB,pHB_Survey$INS_LIG, pch=16, xlab="pHB", ylab= "INS_LIG")
+cor.test(pHB_Survey$PHB,pHB_Survey$INS_LIG, method = "spearman")
+abline(lm(pHB_Survey$INS_LIG~pHB_Survey$PHB))
+summary(lm(pHB_Survey$INS_LIG~pHB_Survey$PHB))
+
+# Investigating the log of INS_LIG
+log.INS_LIG<-log(pHB_Survey$INS_LIG)
+hist(log.INS_LIG)
+cor.test(log.INS_LIG,pHB_Survey$PHB, method = "pearson")
+plot(pHB_Survey$PHB,log.INS_LIG, pch=16, ylab="pHB", xlab= "INS_LIG (log)")
+adline(lm(log.INS_LIG~pHB_Survey$PHB))
+summary(lm(log.INS_LIG~pHB_Survey$PHB))
+
+# Investigating the log of pHB 
+cor.test(log.phb,pHB_Survey$INS_LIG, method = "pearson")
+plot(pHB_Survey$INS_LIG,log.phb, pch=16, ylab="pHB (log)", xlab= "INS_LIG")
+abline(lm(log.phb~pHB_Survey$INS_LIG))
+summary(lm(log.phb~pHB_Survey$INS_LIG))
+
+# Investigating the log of both
+cor.test(log.phb,log.INS_LIG, method = "pearson")
+plot(log.SOL_LIG,log.phb, pch=16, ylab="pHB (log)", xlab= "INS_LIG (log)")
+abline(lm(log.phb~log.INS_LIG))
+summary(lm(log.phb~log.INS_LIG))
+
+# correlation with MFA
+hist(pHB_Survey$MFA)
+plot(pHB_Survey$PHB,pHB_Survey$MFA, pch=16, xlab="pHB", ylab= "MFA")
+cor.test(pHB_Survey$PHB,pHB_Survey$MFA, method = "spearman")
+abline(lm(pHB_Survey$MFA~pHB_Survey$PHB))
+summary(lm(pHB_Survey$MFA~pHB_Survey$PHB))
+
+# Investigating the log of MFA
+log.MFA<-log(pHB_Survey$MFA)
+hist(log.MFA)
+cor.test(log.MFA,pHB_Survey$PHB, method = "pearson")
+plot(pHB_Survey$PHB,log.MFA, pch=16, ylab="pHB", xlab= "MFA (log)")
+adline(lm(log.MFA~pHB_Survey$PHB))
+summary(lm(log.MFA~pHB_Survey$PHB))
+
+# Investigating the log of pHB 
+cor.test(log.phb,pHB_Survey$MFA, method = "pearson")
+plot(pHB_Survey$MFA,log.phb, pch=16, ylab="pHB (log)", xlab= "MFA")
+abline(lm(log.phb~pHB_Survey$MFA))
+summary(lm(log.phb~pHB_Survey$MFA))
+
+# Investigating the log of both
+cor.test(log.phb,log.MFA, method = "pearson")
+plot(log.MFA,log.phb, pch=16, ylab="pHB (log)", xlab= "MFA (log)")
+abline(lm(log.phb~log.MFA))
+summary(lm(log.phb~log.MFA))
+
+# correlation with HEMICELL
+hist(pHB_Survey$HEMICELL)
+plot(pHB_Survey$PHB,pHB_Survey$HEMICELL, pch=16, xlab="pHB", ylab= "HEMICELL")
+cor.test(pHB_Survey$PHB,pHB_Survey$HEMICELL, method = "spearman")
+abline(lm(pHB_Survey$HEMICELL~pHB_Survey$PHB))
+summary(lm(pHB_Survey$HEMICELL~pHB_Survey$PHB))
+
+# Investigating the log of HEMICELL
+log.HEMICELL<-log(pHB_Survey$HEMICELL)
+hist(log.HEMICELL)
+cor.test(log.HEMICELL,pHB_Survey$PHB, method = "pearson")
+plot(pHB_Survey$PHB,log.HEMICELL, pch=16, ylab="pHB", xlab= "HEMICELL (log)")
+adline(lm(log.HEMICELL~pHB_Survey$PHB))
+summary(lm(log.HEMICELL~pHB_Survey$PHB))
+
+# Investigating the log of pHB 
+cor.test(log.phb,pHB_Survey$HEMICELL, method = "pearson")
+plot(pHB_Survey$HEMICELL,log.phb, pch=16, ylab="pHB (log)", xlab= "HEMICELL")
+abline(lm(log.phb~pHB_Survey$HEMICELL))
+summary(lm(log.phb~pHB_Survey$HEMICELL))
+
+# Investigating the log of both
+cor.test(log.phb,log.HEMICELL, method = "pearson")
+plot(log.HEMICELL,log.phb, pch=16, ylab="pHB (log)", xlab= "HEMICELL (log)")
+abline(lm(log.phb~log.HEMICELL))
+summary(lm(log.phb~log.HEMICELL))
+
+# correlation with XYL
+hist(pHB_Survey$XYL)
+plot(pHB_Survey$PHB,pHB_Survey$XYL, pch=16, xlab="pHB", ylab= "XYL")
+cor.test(pHB_Survey$PHB,pHB_Survey$XYL, method = "spearman")
+abline(lm(pHB_Survey$XYL~pHB_Survey$PHB))
+summary(lm(pHB_Survey$XYL~pHB_Survey$PHB))
+
+# Investigating the log of XYL
+log.XYL<-log(pHB_Survey$XYL)
+hist(log.XYL)
+cor.test(log.XYL,pHB_Survey$PHB, method = "pearson")
+plot(pHB_Survey$PHB,log.XYL, pch=16, ylab="pHB", xlab= "XYL (log)")
+adline(lm(log.XYL~pHB_Survey$PHB))
+summary(lm(log.XYL~pHB_Survey$PHB))
+
+# Investigating the log of pHB 
+cor.test(log.phb,pHB_Survey$XYL, method = "pearson")
+plot(pHB_Survey$XYL,log.phb, pch=16, ylab="pHB (log)", xlab= "XYL")
+abline(lm(log.phb~pHB_Survey$XYL))
+summary(lm(log.phb~pHB_Survey$XYL))
+
+# Investigating the log of both
+cor.test(log.phb,log.XYL, method = "pearson")
+plot(log.XYL,log.phb, pch=16, ylab="pHB (log)", xlab= "XYL (log)")
+abline(lm(log.phb~log.XYL))
+summary(lm(log.phb~log.XYL))
+
+# correlation with TOT_LIG
+hist(pHB_Survey$TOT_LIG)
+plot(pHB_Survey$PHB,pHB_Survey$TOT_LIG, pch=16, xlab="pHB", ylab= "TOT_LIG")
+cor.test(pHB_Survey$PHB,pHB_Survey$TOT_LIG, method = "spearman")
+abline(lm(pHB_Survey$TOT_LIG~pHB_Survey$PHB))
+summary(lm(pHB_Survey$TOT_LIG~pHB_Survey$PHB))
+
+# Investigating the log of TOT_LIG
+log.TOT_LIG<-log(pHB_Survey$TOT_LIG)
+hist(log.TOT_LIG)
+cor.test(log.TOT_LIG,pHB_Survey$PHB, method = "pearson")
+plot(pHB_Survey$PHB,log.TOT_LIG, pch=16, ylab="pHB", xlab= "TOT_LIG (log)")
+adline(lm(log.TOT_LIG~pHB_Survey$PHB))
+summary(lm(log.TOT_LIG~pHB_Survey$PHB))
+
+# Investigating the log of pHB 
+cor.test(log.phb,pHB_Survey$TOT_LIG, method = "pearson")
+plot(pHB_Survey$TOT_LIG,log.phb, pch=16, ylab="pHB (log)", xlab= "TOT_LIG")
+abline(lm(log.phb~pHB_Survey$TOT_LIG))
+summary(lm(log.phb~pHB_Survey$TOT_LIG))
+
+# Investigating the log of both
+cor.test(log.phb,log.TOT_LIG, method = "pearson")
+plot(log.TOT_LIG,log.phb, pch=16, ylab="pHB (log)", xlab= "TOT_LIG (log)")
+abline(lm(log.phb~log.TOT_LIG))
+summary(lm(log.phb~log.TOT_LIG))
+
+# correlation with CRYST
+hist(pHB_Survey$CRYST)
+plot(pHB_Survey$PHB,pHB_Survey$CRYST, pch=16, xlab="pHB", ylab= "CRYST")
+cor.test(pHB_Survey$PHB,pHB_Survey$CRYST, method = "spearman")
+abline(lm(pHB_Survey$CRYST~pHB_Survey$PHB))
+summary(lm(pHB_Survey$CRYST~pHB_Survey$PHB))
+
+# Investigating the log of CRYST
+log.CRYST<-log(pHB_Survey$CRYST)
+hist(log.CRYST)
+cor.test(log.CRYST,pHB_Survey$PHB, method = "pearson")
+plot(pHB_Survey$PHB,log.CRYST, pch=16, ylab="pHB", xlab= "CRYST (log)")
+adline(lm(log.CRYST~pHB_Survey$PHB))
+summary(lm(log.CRYST~pHB_Survey$PHB))
+
+# Investigating the log of pHB 
+cor.test(log.phb,pHB_Survey$CRYST, method = "pearson")
+plot(pHB_Survey$CRYST,log.phb, pch=16, ylab="pHB (log)", xlab= "CRYST")
+abline(lm(log.phb~pHB_Survey$CRYST))
+summary(lm(log.phb~pHB_Survey$CRYST))
+
+# Investigating the log of both
+cor.test(log.phb,log.CRYST, method = "pearson")
+plot(log.CRYST,log.phb, pch=16, ylab="pHB (log)", xlab= "CRYST (log)")
+abline(lm(log.phb~log.CRYST))
+summary(lm(log.phb~log.CRYST))
+
+# correlation with GLU
+hist(pHB_Survey$GLU)
+plot(pHB_Survey$PHB,pHB_Survey$GLU, pch=16, xlab="pHB", ylab= "GLU")
+cor.test(pHB_Survey$PHB,pHB_Survey$GLU, method = "spearman")
+abline(lm(pHB_Survey$GLU~pHB_Survey$PHB))
+summary(lm(pHB_Survey$GLU~pHB_Survey$PHB))
+
+# Investigating the log of GLU
+log.GLU<-log(pHB_Survey$GLU)
+hist(log.GLU)
+cor.test(log.GLU,pHB_Survey$PHB, method = "pearson")
+plot(pHB_Survey$PHB,log.GLU, pch=16, ylab="pHB", xlab= "GLU (log)")
+adline(lm(log.GLU~pHB_Survey$PHB))
+summary(lm(log.GLU~pHB_Survey$PHB))
+
+# Investigating the log of pHB 
+cor.test(log.phb,pHB_Survey$GLU, method = "pearson")
+plot(pHB_Survey$GLU,log.phb, pch=16, ylab="pHB (log)", xlab= "GLU")
+abline(lm(log.phb~pHB_Survey$GLU))
+summary(lm(log.phb~pHB_Survey$GLU))
+
+# Investigating the log of both
+cor.test(log.phb,log.GLU, method = "pearson")
+plot(log.GLU,log.phb, pch=16, ylab="pHB (log)", xlab= "GLU (log)")
+abline(lm(log.phb~log.GLU))
+summary(lm(log.phb~log.GLU))
+
+# correlation with MFA_YR1
+hist(pHB_Survey$MFA_YR1)
+plot(pHB_Survey$PHB,pHB_Survey$MFA_YR1, pch=16, xlab="pHB", ylab= "MFA_YR1")
+cor.test(pHB_Survey$PHB,pHB_Survey$MFA_YR1, method = "spearman")
+abline(lm(pHB_Survey$MFA_YR1~pHB_Survey$PHB))
+summary(lm(pHB_Survey$MFA_YR1~pHB_Survey$PHB))
+
+# Investigating the log of MFA_YR1
+log.MFA_YR1<-log(pHB_Survey$MFA_YR1)
+hist(log.MFA_YR1)
+cor.test(log.MFA_YR1,pHB_Survey$PHB, method = "pearson")
+plot(pHB_Survey$PHB,log.MFA_YR1, pch=16, ylab="pHB", xlab= "MFA_YR1 (log)")
+adline(lm(log.MFA_YR1~pHB_Survey$PHB))
+summary(lm(log.MFA_YR1~pHB_Survey$PHB))
+
+# Investigating the log of pHB 
+cor.test(log.phb,pHB_Survey$MFA_YR1, method = "pearson")
+plot(pHB_Survey$MFA_YR1,log.phb, pch=16, ylab="pHB (log)", xlab= "MFA_YR1")
+abline(lm(log.phb~pHB_Survey$MFA_YR1))
+summary(lm(log.phb~pHB_Survey$MFA_YR1))
+
+# Investigating the log of both
+cor.test(log.phb,log.MFA_YR1, method = "pearson")
+plot(log.MFA_YR1,log.phb, pch=16, ylab="pHB (log)", xlab= "MFA_YR1 (log)")
+abline(lm(log.phb~log.MFA_YR1))
+summary(lm(log.phb~log.MFA_YR1))
+
+# All of the other variables (RHA, A_CELL, GAL, FIB_LNGTH, ARA, and MAN) do not have a significant correlation (i.e. p-value >0.05). No analysis done. 
 ```
 
 ```{R Basic Statistics by Lenka}
-#run if working on Windows 
+#"clipboaord" function will only run if working on Windows 
 data.pHB<-read.delim("clipboard")
-#run if working on Mac
-data.pHB<-read.delim(pipe(“pbpaste”))
 attach(data.pHB)
 detach(data.pHB)
 rm(data.pHB)
 str(data.pHB)
-
 head(data.pHB)
-
 
 # checking for trends
 pairs(data.pHB)
